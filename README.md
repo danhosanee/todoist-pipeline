@@ -1,6 +1,6 @@
-# Todoist Completed
+# todoist-pipline
 
-> Project to track completed items from todoist on a period basis
+> Track completed items from todoist
 
 ## Goal 
 
