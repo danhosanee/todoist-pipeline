@@ -24,12 +24,6 @@ def get_sync_url(relative_path: str) -> str:
     return urljoin(SYNC_API, relative_path)
 
 
-def get_api_code(filename: str) -> str:
-    config = configparser.ConfigParser()
-    config.read(filename)
-    return config
-
-
 def request_string(request_string: str, **kwargs: str) -> str:
     end_point = get_sync_url(request_string)
     filters = "".join(f"&{k}={v}"for k, v in kwargs.items())
