@@ -5,6 +5,7 @@ from typing import Dict
 import configparser
 import pandas as pd
 from datetime import datetime
+import pytz
 
 
 BASE_URL = "https://api.todoist.com"
@@ -24,7 +25,7 @@ def get_sync_url(relative_path: str) -> str:
     return urljoin(SYNC_API, relative_path)
 
 
-def request_string(request_string: str, **kwargs: str) -> str:
+def request_string(request_string: str, **kwargs) -> str:
     end_point = get_sync_url(request_string)
     filters = "".join(f"&{k}={v}"for k, v in kwargs.items())
     return f"{end_point}?{filters}"
@@ -60,7 +61,13 @@ def main():
 
     request_header = create_headers(config["API_CONFIG"]["API_CODE"])
 
-    date_today = datetime.today()
+    get_tz_url = get_sync_url("user")
+
+    get_tz_request = get_request(url=get_tz_url, header=request_header)
+
+    tz = get_tz_request['tz_info']['timezone']
+
+    date_today = datetime.now(pytz.timezone(tz)).today()
 
     mon_week_adj = -2 if date_today != 0 else -1
 
@@ -81,7 +88,15 @@ def main():
 
     df_items = json_to_df(get_completed_request, ['items'])
 
-    df_items.to_csv(f"items_{prev_sunday.split('T')[0]}.csv")
+    df_trnsform = (
+        df_items
+        .assign(
+            completed_at=pd.to_datetime(df_items['completed_at'])
+            .dt.tz_convert(tz)
+            .dt.strftime('%Y-%m-%d %H:%M')
+        )
+        .to_csv(f"completedItems_{prev_sunday.split('T')[0]}.csv",index=False)
+    )
 
 
 if __name__ == "__main__":
