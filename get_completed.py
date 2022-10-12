@@ -5,7 +5,7 @@ from typing import Dict
 import configparser
 import pandas as pd
 from datetime import datetime
-import pytz
+from datetime import timezone
 
 
 BASE_URL = "https://api.todoist.com"
@@ -40,7 +40,7 @@ def get_request(url: str, header: str) -> json:
     return r.json()
 
 
-def prev_wk_day(date_input: datetime,  week_num: int, week_day: int) -> str:
+def prev_wk_day(date_input: datetime,  week_num: int, week_day: int) -> datetime:
     date = date_input + pd.tseries.offsets.Week(week_num, weekday=week_day)
     return date
 
@@ -51,6 +51,10 @@ def format_str(date: datetime, strformat: str) -> str:
 
 def json_to_df(json: json, path: list) -> pd.DataFrame():
     return pd.json_normalize(json, record_path=path)
+
+
+def tz_to_utc(date: datetime) -> str:
+    return date.tz_convert(timezone.utc).strftime("%Y-%m-%dT%H:%M")
 
 
 def main():
@@ -67,22 +71,20 @@ def main():
 
     tz = get_tz_request['tz_info']['timezone']
 
-    date_today = datetime.now(pytz.timezone(tz)).today()
+    date_today = datetime.now().date()
 
     mon_week_adj = -2 if date_today != 0 else -1
 
     prev_monday = prev_wk_day(date_input=date_today,
-                              week_num=mon_week_adj,
-                              week_day=0,
-                              ).strftime("%Y-%m-%dT00:00")
+                              week_num=mon_week_adj, week_day=0).tz_localize(tz)
 
     prev_sunday = prev_wk_day(date_input=date_today,
-                              week_num=-1,
-                              week_day=6).strftime("%Y-%m-%dT24:00")
+                              week_num=-1, week_day=6).tz_localize(tz)
 
     get_completed_url = request_string(
-        "completed/get_all", since=prev_monday, until=prev_sunday
+        "completed/get_all", since=tz_to_utc(prev_monday), until=tz_to_utc(prev_sunday)
     )
+
     get_completed_request = get_request(
         url=get_completed_url, header=request_header)
 
@@ -95,7 +97,7 @@ def main():
             .dt.tz_convert(tz)
             .dt.strftime('%Y-%m-%d %H:%M')
         )
-        .to_csv(f"completedItems_{prev_sunday.split('T')[0]}.csv",index=False)
+        .to_csv(f"completedItems_{prev_sunday.date()}.csv", index=False)
     )
 
 
