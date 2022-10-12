@@ -12,11 +12,12 @@
 
 ### To Do:
 
-- [x] Write Python script to get completed items from the previous week
+- [x] ~~Write Python script to get completed items from the previous week~~
 
-- [X] Convert timezone to AEST
+- [X] ~~Convert timezone to AEST in csv output~~
 
-- [ ] Create function to convert local datetime parameters to utc 
+- [x] ~~Create function to convert local datetime parameters to utc~~ 
 
 - [ ] Set up function to run on AWS Lambda 
 
+- [ ] Refactor code when initial pipeline is completed
