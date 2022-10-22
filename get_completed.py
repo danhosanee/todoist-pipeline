@@ -40,7 +40,7 @@ def get_request(url: str, header: str) -> json:
     return r.json()
 
 
-def prev_wk_day(date_input: datetime,  week_num: int, week_day: int) -> datetime:
+def date_offset(date_input: datetime,  week_num: int, week_day: int) -> datetime:
     date = date_input + pd.tseries.offsets.Week(week_num, weekday=week_day)
     return date
 
@@ -75,10 +75,10 @@ def main():
 
     mon_week_adj = -2 if date_today != 0 else -1
 
-    prev_monday = prev_wk_day(date_input=date_today,
+    prev_monday = date_offset(date_input=date_today,
                               week_num=mon_week_adj, week_day=0).tz_localize(tz)
 
-    prev_sunday = prev_wk_day(date_input=date_today,
+    prev_sunday = date_offset(date_input=date_today,
                               week_num=-1, week_day=6).tz_localize(tz)
 
     get_completed_url = request_string(
@@ -99,6 +99,7 @@ def main():
         )
         .to_csv(f"completedItems_{prev_sunday.date()}.csv", index=False)
     )
+
 
 
 if __name__ == "__main__":
