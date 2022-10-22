@@ -18,6 +18,6 @@
 
 - [x] ~~Create function to convert local datetime parameters to utc~~ 
 
-- [ ] Set up function to run on AWS Lambda 
+- [ ] Method of scheduling script: AWS lambda, Airflow etc
 
-- [ ] Refactor code when initial pipeline is completed
+- [ ] Method of persisting date: S3, Aurora, SQLite etc 
