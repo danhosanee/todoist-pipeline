@@ -27,7 +27,7 @@ def get_sync_url(relative_path: str) -> str:
 
 def request_string(request_string: str, **kwargs) -> str:
     end_point = get_sync_url(request_string)
-    filters = "".join(f"&{k}={v}"for k, v in kwargs.items())
+    filters = "".join(f"&{k}={v}" for k, v in kwargs.items())
     return f"{end_point}?{filters}"
 
 
@@ -40,7 +40,7 @@ def get_request(url: str, header: str) -> json:
     return r.json()
 
 
-def date_offset(date_input: datetime,  week_num: int, week_day: int) -> datetime:
+def date_offset(date_input: datetime, week_num: int, week_day: int) -> datetime:
     date = date_input + pd.tseries.offsets.Week(week_num, weekday=week_day)
     return date
 
@@ -69,32 +69,33 @@ def main():
 
     get_tz_request = get_request(url=get_tz_url, header=request_header)
 
-    tz = get_tz_request['tz_info']['timezone']
+    tz = get_tz_request["tz_info"]["timezone"]
 
     date_today = datetime.now().date()
 
     mon_week_adj = -2 if date_today.weekday() != 0 else -1
 
-    prev_monday = date_offset(date_input=date_today,
-                              week_num=mon_week_adj, week_day=0).tz_localize(tz)
+    prev_monday = date_offset(
+        date_input=date_today, week_num=mon_week_adj, week_day=0
+    ).tz_localize(tz)
 
-    prev_sunday = date_offset(date_input=date_today,
-                              week_num=-1, week_day=6).tz_localize(tz)
+    prev_sunday = date_offset(
+        date_input=date_today, week_num=-1, week_day=6
+    ).tz_localize(tz)
 
     get_completed_url = request_string(
         "completed/get_all", since=tz_to_utc(prev_monday), until=tz_to_utc(prev_sunday)
     )
 
-    get_completed_request = get_request(
-        url=get_completed_url, header=request_header)
+    get_completed_request = get_request(url=get_completed_url, header=request_header)
 
-    df_items = json_to_df(get_completed_request, ['items'])
+    df_items = json_to_df(get_completed_request, ["items"])
 
     df_items.assign(
-            completed_at=pd.to_datetime(df_items['completed_at'])
-            .dt.tz_convert(tz)
-            .dt.strftime('%Y-%m-%d %H:%M')
-        ).to_csv(f"completedItems_{prev_sunday.date()}.csv", index=False)
+        completed_at=pd.to_datetime(df_items["completed_at"])
+        .dt.tz_convert(tz)
+        .dt.strftime("%Y-%m-%d %H:%M")
+    ).to_csv(f"completedItems_{prev_sunday.date()}.csv", index=False)
 
 
 if __name__ == "__main__":
