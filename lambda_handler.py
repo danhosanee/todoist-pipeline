@@ -2,17 +2,19 @@ import json
 import requests
 from urllib.parse import urljoin
 from typing import Dict
-import configparser
 import pandas as pd
 from datetime import datetime
 from datetime import timezone
-
+import os
+import boto3
+from io import StringIO
 
 BASE_URL = "https://api.todoist.com"
 AUTH_BASE_URL = "https://todoist.com"
 SYNC_VERSION = "v9"
 SYNC_API = urljoin(BASE_URL, f"/sync/{SYNC_VERSION}/")
 AUTHORIZATION = ("Authorization", "Bearer %s")
+AWS_S3_BUCKET = "todoist-completed"
 
 
 def create_headers(token: str) -> Dict[str, str]:
@@ -57,13 +59,9 @@ def tz_to_utc(date: datetime) -> str:
     return date.tz_convert(timezone.utc).strftime("%Y-%m-%dT%H:%M")
 
 
-def main():
+def lambda_handler(event, context):
 
-    config = configparser.ConfigParser()
-
-    config.read("settings.ini")
-
-    request_header = create_headers(config["API_CONFIG"]["API_CODE"])
+    request_header = create_headers(os.environ["API_CODE"])
 
     get_tz_url = get_sync_url("user")
 
@@ -87,15 +85,28 @@ def main():
 
     get_completed_request = get_request(
         url=get_completed_url, header=request_header)
-
+    
     df_items = json_to_df(get_completed_request, ['items'])
+    
+    csv_buffer = StringIO() 
 
     df_items.assign(
-            completed_at=pd.to_datetime(df_items['completed_at'])
+            completed_at=pd.to_datetime(df_items["completed_at"])
             .dt.tz_convert(tz)
-            .dt.strftime('%Y-%m-%d %H:%M')
-        ).to_csv(f"completedItems_{prev_sunday.date()}.csv", index=False)
-
-
+        ).to_csv(csv_buffer , index=False)
+    
+    s3_resource = boto3.resource('s3')
+    
+    s3_resource.Object(
+                AWS_S3_BUCKET
+                ,f"completedItems_{prev_sunday.date()}.csv"
+            ).put(
+                Body=csv_buffer.getvalue()
+                )
+    
+    return {
+        "status_code" : 200
+    }
+    
 if __name__ == "__main__":
-    main()
+    lambda_handler()
