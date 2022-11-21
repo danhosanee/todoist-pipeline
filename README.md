@@ -6,9 +6,9 @@
 
 - Set up a pipeline to persist completed items from Todoist within the AWS environment
 
-- Data to be loaded on a weekly basis via AWS Lambda 
+- Data to be loaded on a weekly basis via AWS Lambda + AWS Eventbridge Scheduler
 
-- TBD: Persist data either within S3, Aurora 
+- Persist data either within S3
 
 ### To Do:
 
@@ -18,6 +18,6 @@
 
 - [x] ~~Create function to convert local datetime parameters to utc~~ 
 
-- [ ] Method of scheduling script: AWS lambda, Airflow etc
+- [x] ~~Method of scheduling script: AWS Lambda + AWS Eventbridge Scheduler~~
 
-- [ ] Method of persisting date: S3, Aurora, SQLite etc 
+- [x] ~~Method of persisting date: S3~~
