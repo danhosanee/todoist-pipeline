@@ -8,7 +8,7 @@
 
 - Data to be loaded on a weekly basis via AWS Lambda + AWS Eventbridge Scheduler
 
-- Persist data either within S3
+- Persist data within S3
 
 ### To Do:
 
