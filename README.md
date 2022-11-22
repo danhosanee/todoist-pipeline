@@ -2,6 +2,8 @@
 
 > Track completed items from todoist
 
+![pipeline](images/todoist_pipeline.jpg "aws pipeline")
+
 ## Goal 
 
 - Set up a pipeline to persist completed items from Todoist within the AWS environment
