@@ -2,3 +2,7 @@ settings.ini
 *.csv
 *.ipynb
 .DS_Store
+get_completed.py
+__pycache__
+.coverage
+.pytest_cache
