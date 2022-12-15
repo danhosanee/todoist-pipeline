@@ -65,11 +65,11 @@ def main():
 
     request_header = create_headers(config["API_CONFIG"]["API_CODE"])
 
-    get_tz_url = get_sync_url("user")
+    get_timezone_url = get_sync_url("user")
 
-    get_tz_request = get_request(url=get_tz_url, header=request_header)
+    get_timezone_request = get_request(url=get_timezone_url, header=request_header)
 
-    tz = get_tz_request["tz_info"]["timezone"]
+    timezone = get_timezone_request["tz_info"]["timezone"]
 
     date_today = datetime.now().date()
 
@@ -77,11 +77,11 @@ def main():
 
     prev_monday = date_offset(
         date_input=date_today, week_num=mon_week_adj, week_day=0
-    ).tz_localize(tz)
+    ).tz_localize(timezone)
 
     prev_sunday = date_offset(
         date_input=date_today, week_num=-1, week_day=6
-    ).tz_localize(tz)
+    ).tz_localize(timezone)
 
     get_completed_url = request_string(
         "completed/get_all", since=timezone_to_utc(prev_monday), until=timezone_to_utc(prev_sunday)
@@ -93,7 +93,7 @@ def main():
 
     df_items.assign(
         completed_at=pd.to_datetime(df_items["completed_at"])
-        .dt.tz_convert(tz)
+        .dt.tz_convert(timezone)
         .dt.strftime("%Y-%m-%d %H:%M")
     ).to_csv(f"completedItems_{prev_sunday.date()}.csv", index=False)
 
